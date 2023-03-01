@@ -9,13 +9,20 @@ parser.read('config.ini')
 remote_ip_address = sys.argv[1]
 all_ports_number = parser.get('speed_nmap', 'ports')
 speed_nmap_arg = parser.get('speed_nmap', 'arg')
+
+complete_nmap_arg = parser.get('complete_nmap', 'arg')
 remote_open_ports = []
+
+class colors:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    RESET = '\033[0m'
 
 # 
 # fonction to do a speed enumeration of port with nmap
 #
 def speed_nmap(remote_ip_address, ports_range, nmap_arg):
-    print("\n--- starting speed port scan ---\n")
+    print("\n--------------------------------\n--- starting speed port scan ---\n--------------------------------\n")
     
     port_scan = nm.NmapScanner(
         remote_ip_address, 
@@ -37,9 +44,67 @@ def speed_nmap(remote_ip_address, ports_range, nmap_arg):
             output_file.write("open port :\n")
             for port in port_scan.scanned_ports(host, proto):
                 state, reason = port_scan.port_state(host, proto, port)
-                print("    " + str(port))
+                print(colors.GREEN + "    " + str(port) + colors.RESET)
                 remote_open_ports.append(str(port))
                 output_file.write("    " + str(port) + "\n")     
 
     output_file.close()
+    
+def complete_nmap(remote_ip_address, ports_range, nmap_arg):
+    print("\n-----------------------------------\n--- starting complete port scan ---\n-----------------------------------")
+    
+    scanner = nm.NmapScanner(
+        remote_ip_address, 
+        arguments=nmap_arg, 
+        ports=ports_range
+    )
+    scanner.run()
+    
+    output_file = open("output.txt", "a")
+    
+    print("\nOS information :")
+    output_file.write("\nOS information :")
+    
+    for os_match, acc in scanner.os_matches(remote_ip_address):
+        print('   OS Match: {}\tAccuracy:{}%'.format(os_match, acc))
+        output_file.write('   OS Match: {}\tAccuracy:{}%\n'.format(os_match, acc))
+    
+    fingerprint = scanner.os_fingerprint(remote_ip_address)
+    if fingerprint is not None:
+        print('   Fingerprint: {}'.format(fingerprint))
+        output_file.write('   Fingerprint: {}\n'.format(fingerprint))
+
+    for most_acc_os in scanner.most_accurate_os(remote_ip_address):
+        print('   Most accurate OS: ' + colors.GREEN + f'{most_acc_os}' + colors.RESET)
+        output_file.write('   Most accurate OS: ' + f'{most_acc_os}\n')
+    
+    # for every host scanned
+    for host in scanner.scanned_hosts():
+        # for every protocol scanned for each host
+        for proto in scanner.all_protocols(host):
+            # for each scanned port
+            for port in scanner.scanned_ports(host, proto):
+                # Get service object
+                service = scanner.service(host, proto, port)
+                print(f"\nport : {port}")
+                output_file.write(f"\nport : {port}")
+                if service is not None:
+                    print(colors.GREEN + f"   {service.name} | {service.product}" + colors.RESET)
+                    output_file.write(f"   {service.name} | {service.product}\n")
+                    for cpe in service.all_cpes():
+                        print(f"   CPE: {cpe}")
+                        output_file.write(f"   CPE: {cpe}\n")
+                    for name, output in service.all_scripts():
+                        print(f"   Script: {name}\n     Output: {output}")
+                        output_file.write(f"   Script: {name}\n     Output: {output}\n")
+                    # You could also do print(str(service))
+                    # You could also know if 'ssh-keys' script was launched and print the output
+                    if 'ssh-keys' in service:
+                        print("{}".format(service['ssh-keys']))
+                        output_file.write("{}\n".format(service['ssh-keys']))
+                        
+    output_file.close()
+    
 speed_nmap(remote_ip_address, all_ports_number, speed_nmap_arg)
+
+complete_nmap(remote_ip_address, remote_open_ports, complete_nmap_arg)
