@@ -6,6 +6,9 @@ from configparser import ConfigParser
 parser = ConfigParser()
 parser.read('config.ini')
 
+
+print(len(sys.argv))
+
 remote_ip_address = sys.argv[1]
 all_ports_number = parser.get('speed_nmap', 'ports')
 speed_nmap_arg = parser.get('speed_nmap', 'arg')
@@ -13,11 +16,23 @@ speed_nmap_arg = parser.get('speed_nmap', 'arg')
 complete_nmap_arg = parser.get('complete_nmap', 'arg')
 remote_open_ports = []
 
+output_file_name = ""
+
 class colors:
     GREEN = '\033[92m'
     RED = '\033[91m'
     RESET = '\033[0m'
 
+if len(sys.argv) == 3:
+    if sys.argv[2]:
+        output_file_name = parser.get('basic_config', 'file_name')
+    else:
+        output_file_name = sys.argv[2]
+else:
+    output_file_name = parser.get('basic_config', 'file_name')
+    
+print("\nOutput file is : " + colors.GREEN + output_file_name + colors.RESET + "\n")
+    
 # 
 # fonction to do a speed enumeration of port with nmap
 #
@@ -30,7 +45,7 @@ def speed_nmap(remote_ip_address, ports_range, nmap_arg):
         ports=ports_range
     )
     port_scan.run()
-    output_file = open("output.txt", "a")
+    output_file = open(output_file_name, "a")
         
     for host in port_scan.scanned_hosts():
         # Get state, reason and hostnames
@@ -60,7 +75,7 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
     )
     scanner.run()
     
-    output_file = open("output.txt", "a")
+    output_file = open(output_file_name, "a")
     
     print("\nOS information :")
     output_file.write("\nOS information :")
