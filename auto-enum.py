@@ -2,35 +2,57 @@
 import nmapthon as nm
 
 import sys
+
 from configparser import ConfigParser
-parser = ConfigParser()
-parser.read('config.ini')
 
-
-print(len(sys.argv))
-
-remote_ip_address = sys.argv[1]
-all_ports_number = parser.get('speed_nmap', 'ports')
-speed_nmap_arg = parser.get('speed_nmap', 'arg')
-
-complete_nmap_arg = parser.get('complete_nmap', 'arg')
-remote_open_ports = []
-
-output_file_name = ""
-
+#
+# CLASS
+#
 class colors:
     GREEN = '\033[92m'
     RED = '\033[91m'
     RESET = '\033[0m'
-
-if len(sys.argv) == 3:
-    if sys.argv[2]:
-        output_file_name = parser.get('basic_config', 'file_name')
-    else:
-        output_file_name = sys.argv[2]
-else:
-    output_file_name = parser.get('basic_config', 'file_name')
     
+class errors:
+    config_file = 'Can\'t find this parameter in the \"config.ini\" file :\n   '
+    argv = 'No arguments in the command for:\n   '
+    running_script = 'Can\'t run : '
+
+#
+# Variable 
+#
+parser = ConfigParser()
+parser.read('config.ini')
+
+remote_ip_address = sys.argv[1]
+remote_open_ports = []
+
+try:
+    all_ports_number = parser.get('speed_nmap', 'ports')
+except:
+    print(errors.config_file + colors.RED + 'speed_nmap : ports' + colors.RESET)
+
+try:
+    speed_nmap_arg = parser.get('speed_nmap', 'arg')
+except:
+    print(errors.config_file + colors.RED + 'speed_nmap : arg' + colors.RESET)
+
+try:    
+    complete_nmap_arg = parser.get('complete_nmap', 'arg')
+except:
+    print(errors.config_file + colors.RED + 'complete_nmap : arg' + colors.RESET)
+
+try:
+    if sys.argv[2]:
+        output_file_name = sys.argv[2]
+except:
+    print(errors.argv + colors.RED + 'output_file_name' + colors.RESET)
+    try:
+        output_file_name = parser.get('basic_config', 'file_name')
+    except:
+        print(errors.config_file + colors.RED + 'basic_config : file_name' + colors.RESET)
+        output_file_name = "tryout.txt"
+
 print("\nOutput file is : " + colors.GREEN + output_file_name + colors.RESET + "\n")
     
 # 
@@ -44,7 +66,8 @@ def speed_nmap(remote_ip_address, ports_range, nmap_arg):
         arguments=nmap_arg, 
         ports=ports_range
     )
-    port_scan.run()
+    
+    port_scan.run() 
     output_file = open(output_file_name, "a")
         
     for host in port_scan.scanned_hosts():
@@ -73,8 +96,8 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
         arguments=nmap_arg, 
         ports=ports_range
     )
-    scanner.run()
     
+    scanner.run()
     output_file = open(output_file_name, "a")
     
     print("\nOS information :")
@@ -119,7 +142,18 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
                         output_file.write("{}\n".format(service['ssh-keys']))
                         
     output_file.close()
-    
-speed_nmap(remote_ip_address, all_ports_number, speed_nmap_arg)
 
-complete_nmap(remote_ip_address, remote_open_ports, complete_nmap_arg)
+#
+# running fonction
+#
+try:
+    speed_nmap(remote_ip_address, all_ports_number, speed_nmap_arg)
+except:
+    print(errors.running_script + colors.RED + 'speed_nmap' + colors.RESET)
+    exit()
+
+try:
+    complete_nmap(remote_ip_address, remote_open_ports, complete_nmap_arg)
+except:
+    print(errors.running_script + colors.RED + 'complete_nmap' + colors.RESET)
+    exit()
