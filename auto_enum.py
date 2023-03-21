@@ -1,13 +1,13 @@
 # importation du module nmap
 import nmapthon as nm
-
 import sys
-
 from configparser import ConfigParser
 
+from service_researcher import service_searcher
 #
 # CLASS
 #
+
 class colors:
     GREEN = '\033[92m'
     RED = '\033[91m'
@@ -145,13 +145,13 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
                         
     output_file.close()
     
-def http_directory_researcher(port, remote_ip):
-    print('http function start :', port, remote_ip)
+# def http_directory_researcher(port, remote_ip):
+#     print('http function start :', port, remote_ip)
     
-def service_searcher(remote_service, remote_port):
-    for service_name in remote_service:
-        if service_name == 'http':
-            http_directory_researcher(remote_port[remote_service.index(service_name)], remote_ip_address)
+# def service_searcher(remote_service, remote_port):
+#     for service_name in remote_service:
+#         if service_name == 'http':
+#             http_directory_researcher(remote_port[remote_service.index(service_name)], remote_ip_address)
 
 #
 # running fonction
@@ -167,9 +167,9 @@ try:
 except:
     print(errors.running_script + colors.RED + 'complete_nmap' + colors.RESET)
     exit()
-    
+
 try:
-    service_searcher(remote_service_name, remote_service_port)
+    service_searcher(remote_service_name, remote_service_port, remote_ip_address)
 except:
     print(errors.running_script + colors.RED + 'service_searcher' + colors.RESET)
     exit()
