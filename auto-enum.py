@@ -26,6 +26,8 @@ parser.read('config.ini')
 
 remote_ip_address = sys.argv[1]
 remote_open_ports = []
+remote_service_name = []
+remote_service_port = []
 
 try:
     all_ports_number = parser.get('speed_nmap', 'ports')
@@ -105,16 +107,14 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
     
     for os_match, acc in scanner.os_matches(remote_ip_address):
         print('   OS Match: {}\tAccuracy:{}%'.format(os_match, acc))
-        output_file.write('   OS Match: {}\tAccuracy:{}%\n'.format(os_match, acc))
     
     fingerprint = scanner.os_fingerprint(remote_ip_address)
     if fingerprint is not None:
         print('   Fingerprint: {}'.format(fingerprint))
-        output_file.write('   Fingerprint: {}\n'.format(fingerprint))
 
     for most_acc_os in scanner.most_accurate_os(remote_ip_address):
         print('   Most accurate OS: ' + colors.GREEN + f'{most_acc_os}' + colors.RESET)
-        output_file.write('   Most accurate OS: ' + f'{most_acc_os}\n')
+        output_file.write(most_acc_os + '\n')
     
     # for every host scanned
     for host in scanner.scanned_hosts():
@@ -129,6 +129,8 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
                 if service is not None:
                     print(colors.GREEN + f"   {service.name} | {service.product}" + colors.RESET)
                     output_file.write(f"   {service.name} | {service.product}\n")
+                    remote_service_name.append(service.name)
+                    remote_service_port.append(port)
                     for cpe in service.all_cpes():
                         print(f"   CPE: {cpe}")
                         output_file.write(f"   CPE: {cpe}\n")
@@ -142,6 +144,14 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
                         output_file.write("{}\n".format(service['ssh-keys']))
                         
     output_file.close()
+    
+def http_directory_researcher(port, remote_ip):
+    print('http function start :', port, remote_ip)
+    
+def service_searcher(remote_service, remote_port):
+    for service_name in remote_service:
+        if service_name == 'http':
+            http_directory_researcher(remote_port[remote_service.index(service_name)], remote_ip_address)
 
 #
 # running fonction
@@ -156,4 +166,10 @@ try:
     complete_nmap(remote_ip_address, remote_open_ports, complete_nmap_arg)
 except:
     print(errors.running_script + colors.RED + 'complete_nmap' + colors.RESET)
+    exit()
+    
+try:
+    service_searcher(remote_service_name, remote_service_port)
+except:
+    print(errors.running_script + colors.RED + 'service_searcher' + colors.RESET)
     exit()
