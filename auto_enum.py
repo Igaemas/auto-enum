@@ -144,15 +144,6 @@ def complete_nmap(remote_ip_address, ports_range, nmap_arg):
                         output_file.write("{}\n".format(service['ssh-keys']))
                         
     output_file.close()
-    
-# def http_directory_researcher(port, remote_ip):
-#     print('http function start :', port, remote_ip)
-    
-# def service_searcher(remote_service, remote_port):
-#     for service_name in remote_service:
-#         if service_name == 'http':
-#             http_directory_researcher(remote_port[remote_service.index(service_name)], remote_ip_address)
-
 #
 # running fonction
 #
