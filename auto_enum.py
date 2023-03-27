@@ -18,6 +18,16 @@ class errors:
     argv = 'No arguments in the command for:\n   '
     running_script = 'Can\'t run : '
 
+print(colors.GREEN + '''
+\n\n
+ █████╗ ██╗   ██╗████████╗ ██████╗       ███████╗███╗   ██╗██╗   ██╗███╗   ███╗
+██╔══██╗██║   ██║╚══██╔══╝██╔═══██╗      ██╔════╝████╗  ██║██║   ██║████╗ ████║
+███████║██║   ██║   ██║   ██║   ██║█████╗█████╗  ██╔██╗ ██║██║   ██║██╔████╔██║
+██╔══██║██║   ██║   ██║   ██║   ██║╚════╝██╔══╝  ██║╚██╗██║██║   ██║██║╚██╔╝██║
+██║  ██║╚██████╔╝   ██║   ╚██████╔╝      ███████╗██║ ╚████║╚██████╔╝██║ ╚═╝ ██║
+╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝       ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝     ╚═╝                                                                
+''' + colors.RESET)
+
 #
 # Variable 
 #
@@ -48,7 +58,6 @@ try:
     if sys.argv[2]:
         output_file_name = sys.argv[2]
 except:
-    print(errors.argv + colors.RED + 'output_file_name' + colors.RESET)
     try:
         output_file_name = parser.get('basic_config', 'file_name')
     except:
@@ -61,7 +70,7 @@ print("\nOutput file is : " + colors.GREEN + output_file_name + colors.RESET + "
 # fonction to do a speed enumeration of port with nmap
 #
 def speed_nmap(remote_ip_address, ports_range, nmap_arg):
-    print("\n--------------------------------\n--- starting speed port scan ---\n--------------------------------\n")
+    print(colors.GREEN + "\n--------------------------------\n--- starting speed port scan ---\n--------------------------------\n" + colors.RESET)
     
     port_scan = nm.NmapScanner(
         remote_ip_address, 
@@ -91,7 +100,7 @@ def speed_nmap(remote_ip_address, ports_range, nmap_arg):
     output_file.close()
     
 def complete_nmap(remote_ip_address, ports_range, nmap_arg):
-    print("\n-----------------------------------\n--- starting complete port scan ---\n-----------------------------------")
+    print(colors.GREEN + "\n-----------------------------------\n--- starting complete port scan ---\n-----------------------------------" + colors.RESET)
     
     scanner = nm.NmapScanner(
         remote_ip_address, 
@@ -159,8 +168,8 @@ except:
     print(errors.running_script + colors.RED + 'complete_nmap' + colors.RESET)
     exit()
 
-try:
-    service_searcher(remote_service_name, remote_service_port, remote_ip_address)
-except:
-    print(errors.running_script + colors.RED + 'service_searcher' + colors.RESET)
-    exit()
+# try:
+service_searcher(remote_service_name, remote_service_port, remote_ip_address)
+# except:
+#     print(errors.running_script + colors.RED + 'service_searcher' + colors.RESET)
+#     exit()

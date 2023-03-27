@@ -21,9 +21,17 @@ except:
 wordlist_file_var = parser.get('wordlists', 'directory')
 wordlist_txt_file = open(wordlist_file_var).read()
 wordlist = wordlist_txt_file.splitlines()
+word_number = len(wordlist)
 
 valid_directory_list = []
 
+def progress_bar(progress, total):
+    percent = 100 * (progress / float(total))
+    # caracter = ALT + 219
+    bar = '█' * int(percent) + ' ' * (100 - int(percent))
+    print(f"\r|{bar}| {percent:2f}%", end="\r")
+
+progress_int = 0
 def http_directory_researcher(remote_port, remote_ip):
     
     output_file = open(output_file_name, 'a')
@@ -32,6 +40,11 @@ def http_directory_researcher(remote_port, remote_ip):
     output_file.write(f"\ndirectory enumeration on port {remote_port} with this wordlist : {wordlist_file_var}.\n")
     
     for directory in wordlist:
+        global progress_int
+        progress_int += 1
+        
+        progress_bar(progress_int, word_number)
+        
         url_request = f"http://{remote_ip}:{remote_port}/{directory}/"
         
         r = requests.get(url_request)
